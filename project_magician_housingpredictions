@@ -1,0 +1,199 @@
+https://colab.research.google.com/drive/1DGOsaIaz0l6-7peQkON3hBGDyeWhf2DR?usp=share_link 
+
+import pandas as pd
+from sklearn.metrics import mean_absolute_error
+import matplotlib.pyplot as plt
+plt.style.use('ggplot')
+
+from google.colab import drive
+drive.mount('/content/drive')
+
+def make_plot(truth, prediction):
+  plt.plot(truth, color="yellow", label="truth")
+  plt.plot(prediction, color="green", label="predicted")
+  plt.legend()
+  plt.grid()
+  plt.title("Comparing truth and predicted regression values")
+  plt.tight_layout()
+  plt.show()
+
+train_data = pd.read_csv('/content/drive/MyDrive/msc_training_dataset.csv')
+test_data = pd.read_csv('/content/drive/MyDrive/msc_testing_dataset.csv')
+
+print(len(train_data),"\n")
+print(train_data.shape,"\n")
+print(train_data.index,"\n")
+print(train_data.columns,"\n")
+print(train_data.info(),"\n")
+print(train_data.count(),"\n")
+
+print(len(test_data),"\n")
+print(test_data.shape,"\n")
+print(test_data.index,"\n")
+print(test_data.columns,"\n")
+print(test_data.info(),"\n")
+print(test_data.count(),"\n")
+
+train_data.head()
+
+test_data.head()
+
+train_data.describe()
+
+train_data.describe().transpose()
+
+test_data.describe()
+
+test_data.describe().transpose()
+
+train_data['price'].describe()
+
+test_data['price'].describe()
+
+train_data.room.plot.hist()
+
+test_data.room.plot.hist()
+
+train_data_X = train_data.drop('price', axis=1)
+train_data_Y = train_data['price']
+test_data_X = test_data.drop('price', axis=1)
+test_data_Y = test_data['price']
+
+train_data_X.head()
+
+test_data_X.head()
+
+train_data_Y
+
+test_data_Y
+
+#Regression Models.
+
+#Linear Regression.
+
+from sklearn.linear_model import LinearRegression
+from matplotlib import pyplot
+Linreg_data = LinearRegression().fit(train_data_X, train_data_Y)
+Linreg_data
+print("R-sqaured:", Linreg_data.score(train_data_X, train_data_Y))
+predicted_data = Linreg_data.predict(test_data_X)
+predicted_data
+print("Mean Absolute Error:", mean_absolute_error(test_data_Y, predicted_data))
+make_plot(test_data_Y, predicted_data)
+
+predicted_data
+
+test_data_Y
+
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.datasets import load_iris
+import matplotlib.pyplot as plt
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import f1_score
+from sklearn.tree import plot_tree
+DTclf_reg = DecisionTreeClassifier()
+DTclf_reg = DTclf_reg.fit(train_data_X, train_data_Y)
+DTpredicted_data = DTclf_reg.predict(test_data_X)
+accuracy = accuracy_score(test_data_Y, DTpredicted_data)
+f1 = f1_score(test_data_Y, DTpredicted_data, average= 'macro')
+print("Accuracy:", accuracy)
+print("F1 Score:", f1)
+make_plot(test_data_Y, DTpredicted_data)
+
+DTpredicted_data
+
+#Random Forest Regression
+
+from sklearn.ensemble import RandomForestRegressor
+rf_reg_data = RandomForestRegressor().fit(train_data_X, train_data_Y)
+rf_reg_data
+rf_predicted_data = rf_reg_data.predict(test_data_X)
+rf_predicted_data
+print("R-squared:", rf_reg_data.score(train_data_X, train_data_Y))
+print("Mean Absolute Error:", mean_absolute_error(test_data_Y, rf_predicted_data))
+make_plot(test_data_Y, rf_predicted_data)
+
+rf_predicted_data
+
+rf_reg_data.feature_importances_
+
+imp_scores = zip(rf_reg_data.feature_importances_, train_data.columns)
+sorted(list(imp_scores), reverse=True)
+#Ask: I want to plot a bar for the sorted
+
+rf_importances_data = rf_reg_data.feature_importances_
+rf_reg_data.feature_names_in_
+ranks_and_features = zip(rf_importances_data, rf_reg_data.feature_names_in_)
+ranks_and_features = sorted(list(ranks_and_features), reverse=True)
+for x, y, in ranks_and_features:
+    print(x, y)
+
+ranks_and_features
+
+keys_data = [k[1] for k in ranks_and_features ] [::-1]
+keys_data
+
+values_data = [k[0] for k in ranks_and_features ][::-1]
+values_data
+
+plt.barh(keys_data, values_data)
+
+#K-Nearest Neighbors Algorithm
+
+from sklearn.neighbors import KNeighborsRegressor
+neigh_data = KNeighborsRegressor(n_neighbors=7)
+neigh_data.fit(train_data_X, train_data_Y)
+knn_predicted_data = neigh_data.predict(test_data_X)
+print("R-squared:", neigh_data.score(train_data_X, train_data_Y))
+print("Mean Absolute Error:", mean_absolute_error(test_data_Y, knn_predicted_data))
+make_plot(test_data_Y, knn_predicted_data)
+
+knn_predicted_data
+
+#Extreme Gradient Boosting also known as XGBoost. This is the model that is best suitable to predict the housing prices.
+
+import xgboost as xgb
+xgb_reg_data =  xgb.XGBRegressor().fit(train_data_X, train_data_Y)
+xgb_predicted_data = xgb_reg_data.predict(test_data_X)
+print("R-sqaured:", xgb_reg_data.score(train_data_X, train_data_Y))
+print("Mean Absolute Error:", mean_absolute_error(test_data_Y, xgb_predicted_data))
+xgb_importances = xgb_reg_data.feature_importances_
+xgb_ranks_and_features = zip(xgb_importances, xgb_reg_data.feature_names_in_)
+xgb_ranks_and_features = sorted(xgb_ranks_and_features,reverse=True)
+print("\nFeature Importances with XGBoost:")
+for x, y in xgb_ranks_and_features:
+    print(x, y)
+    xgb_predicted_feature = [k[1] for k in xgb_ranks_and_features ] [::-1]
+xgb_importance_values = [k[0] for k in xgb_ranks_and_features ] [::-1]
+plt.barh(xgb_predicted_feature, xgb_importance_values)
+
+xgb_predicted_data
+
+make_plot(test_data_Y, xgb_predicted_data)
+
+xgb_ranks_and_features = zip(xgb_importances, rf_reg_data.feature_names_in_)
+zipped = xgb_ranks_and_features
+
+for tup in zipped:
+    print(tup)
+
+#Mean Absolute Error for all the five (5) models.
+
+lin_mae = mean_absolute_error(test_data_Y, predicted_data)
+DT_mae = mean_absolute_error(test_data_Y, DTpredicted_data)
+rf_mae = mean_absolute_error(test_data_Y, rf_predicted_data)
+knn_mae = mean_absolute_error(test_data_Y, knn_predicted_data)
+xgb_mae = mean_absolute_error(test_data_Y, xgb_predicted_data)
+errors = [lin_mae, DT_mae, knn_mae, rf_mae, xgb_mae]
+labels = ["LinearReg", "DTReg", "KNNReg", "RFReg", "XGBReg"]
+bars = plt.bar(labels, errors, width=0.4)
+for bar in bars:
+    yval = int(bar.get_height())
+    plt.text(bar.get_x(), yval + .005, yval)
+    #plotting the grid of the errors
+    plt.title(labels)
+
+errors = [lin_mae, DT_mae, knn_mae, rf_mae, xgb_mae]
+print(list(errors))
+
+#THE END
