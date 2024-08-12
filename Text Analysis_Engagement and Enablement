@@ -1,0 +1,427 @@
+ENABLEMENT AND ENGAGEMENT 
+This is a script written to show the opinions of staff in the copmany. 
+The use of colab for text analysis to see the most common words used during the survey. 
+Top 3 words are pay, work and staff. Data is available via email to anyanwutakuchinwe@gmail.com
+{
+  "cells": [
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "9bhOwL90o1gI"
+      },
+      "outputs": [],
+      "source": [
+        "!pip install pyxlsb\n",
+        "import pandas as pd\n",
+        "import numpy as np\n",
+        "import matplotlib.pyplot as plt\n",
+        "import seaborn as sns"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "ym-7PcXk9DN_"
+      },
+      "outputs": [],
+      "source": [
+        "from google.colab import drive\n",
+        "drive.mount('/content/drive')"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "RasxWgV0pFPT"
+      },
+      "outputs": [],
+      "source": [
+        "file = pd.read_excel(\"/content/drive/MyDrive/COMM ANALYSIS.xlsx\")"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "E0rbjNH_q3-g"
+      },
+      "outputs": [],
+      "source": [
+        "data = pd.DataFrame(file)"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "2MNZxw_Zt1nF"
+      },
+      "outputs": [],
+      "source": [
+        "\n",
+        "# Display basic information about the DataFrame\n",
+        "print(data.info())\n",
+        "\n",
+        "# Display summary statistics\n",
+        "print(data.describe())\n",
+        "\n",
+        "# Explore unique values in categorical columns\n",
+        "for col in data.select_dtypes(include='object'):\n",
+        "  print(f\"Unique values in {col}: {data[col].unique()}\")\n",
+        "\n",
+        "# Visualize distributions of numerical columns\n",
+        "for col in data.select_dtypes(include=np.number):\n",
+        "  plt.figure()\n",
+        "  sns.histplot(data[col])\n",
+        "  plt.title(f\"Distribution of {col}\")\n",
+        "  plt.show()\n",
+        "\n"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "BUPdLsJCEENg"
+      },
+      "outputs": [],
+      "source": [
+        "# Load the regular expression library\n",
+        "import re\n",
+        "# Handle potential non-string values\n",
+        "def clean_text(text):\n",
+        "  if isinstance(text, str):\n",
+        "    return re.sub('[,\\.!?]', '', text).lower()\n",
+        "  else:\n",
+        "    return \"\"  # Or any desired handling for non-string values\n",
+        "\n",
+        "# Remove punctuation and convert to lowercase\n",
+        "data['suggestions'] = data['EN What suggestions do you have to make BorgWarner an even better place to work?'].map(clean_text)\n",
+        "\n",
+        "# Print out the first rows of suggestions\n",
+        "print(data['suggestions'].head())\n",
+        "\n",
+        "\n",
+        "data\n",
+        " #What one thing do you value most about working for BorgWarner?\n",
+        "\n"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "arVhNk0hI6Eu"
+      },
+      "outputs": [],
+      "source": [
+        "\n",
+        "\n",
+        "data['values'] = data['What one thing do you value most about working for BorgWarner?'].map(clean_text)\n",
+        "\n",
+        "# Print out the first rows of suggestions\n",
+        "print(data['values'].head())\n",
+        "\n",
+        "\n",
+        "data\n",
+        " #What one thing do you value most about working for BorgWarner?"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "070eRK2TJ_2Q"
+      },
+      "outputs": [],
+      "source": [
+        "# Import the wordcloud library\n",
+        "from wordcloud import WordCloud\n",
+        "# Join the different processed titles together.\n",
+        "long_string = ','.join(list(data['suggestions'].values))\n",
+        "# Create a WordCloud object\n",
+        "wordcloud = WordCloud(background_color=\"white\", max_words=5000, contour_width=3, contour_color='steelblue')\n",
+        "# Generate a word cloud\n",
+        "wordcloud.generate(long_string)\n",
+        "# Visualize the word cloud\n",
+        "wordcloud.to_image()"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "GfE8AzPrXOub"
+      },
+      "outputs": [],
+      "source": [
+        "# Import the wordcloud library\n",
+        "from wordcloud import WordCloud\n",
+        "# Join the different processed titles together.\n",
+        "long_string = ','.join(list(data['values'].values))\n",
+        "# Create a WordCloud object\n",
+        "wordcloud = WordCloud(background_color=\"white\", max_words=5000, contour_width=3, contour_color='steelblue')\n",
+        "# Generate a word cloud\n",
+        "wordcloud.generate(long_string)\n",
+        "# Visualize the word cloud\n",
+        "wordcloud.to_image()"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "6RGAmlfSKRhZ"
+      },
+      "outputs": [],
+      "source": [
+        "import gensim\n",
+        "from gensim.utils import simple_preprocess\n",
+        "import nltk\n",
+        "nltk.download('stopwords')\n",
+        "from nltk.corpus import stopwords\n",
+        "stop_words = stopwords.words('english')\n",
+        "#stop_words.extend(['from', 'subject', 're', 'edu', 'use'])\n",
+        "def sent_to_words(sentences):\n",
+        "    for sentence in sentences:\n",
+        "        # deacc=True removes punctuations\n",
+        "        yield(gensim.utils.simple_preprocess(str(sentence), deacc=True))\n",
+        "def remove_stopwords(texts):\n",
+        "    return [[word for word in simple_preprocess(str(doc))\n",
+        "             if word not in stop_words] for doc in texts]\n"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "bN9j38kxMJxX"
+      },
+      "outputs": [],
+      "source": [
+        "suggestions_data = data.suggestions.values.tolist()\n",
+        "suggestion_words = list(sent_to_words(suggestions_data))\n",
+        "# remove stop words\n",
+        "suggestion_words = remove_stopwords(suggestion_words)\n",
+        "print(suggestion_words)"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "dl4hvngXMoBI"
+      },
+      "outputs": [],
+      "source": [
+        "values_data = data['values'].values.tolist()\n",
+        "value_words = list(sent_to_words(values_data))\n",
+        "# remove stop words\n",
+        "value_words = remove_stopwords(value_words)\n",
+        "print(value_words)"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "xIpXsLf-MTw6"
+      },
+      "outputs": [],
+      "source": [
+        "import gensim.corpora as corpora\n",
+        "# Create Dictionary\n",
+        "id2word = corpora.Dictionary(suggestion_words)\n",
+        "# Create Corpus\n",
+        "texts = suggestion_words\n",
+        "# Term Document Frequency\n",
+        "corpus_suggestions = [id2word.doc2bow(text) for text in texts]\n",
+        "# View\n",
+        "print(corpus_suggestions)"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "k2XyFY-mdIpE"
+      },
+      "outputs": [],
+      "source": [
+        "import gensim.corpora as corpora\n",
+        "# Create Dictionary\n",
+        "id2word = corpora.Dictionary(value_words)\n",
+        "# Create Corpus\n",
+        "texts = value_words\n",
+        "# Term Document Frequency\n",
+        "corpus_values = [id2word.doc2bow(text) for text in texts]\n",
+        "# View\n",
+        "print(corpus_values)"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "colab": {
+          "background_save": true,
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "j53mqR1yNAuo",
+        "outputId": "2e45cac1-5f6a-4b58-a22c-ab1df7189072"
+      },
+      "outputs": [
+        {
+          "name": "stderr",
+          "output_type": "stream",
+          "text": [
+            "WARNING:gensim.models.ldamulticore:too few updates, training might not converge; consider increasing the number of passes or iterations to improve accuracy\n",
+            "Process ForkPoolWorker-1:\n",
+            "Traceback (most recent call last):\n",
+            "  File \"/usr/lib/python3.10/multiprocessing/process.py\", line 314, in _bootstrap\n",
+            "    self.run()\n",
+            "  File \"/usr/lib/python3.10/multiprocessing/process.py\", line 108, in run\n",
+            "    self._target(*self._args, **self._kwargs)\n",
+            "  File \"/usr/lib/python3.10/multiprocessing/pool.py\", line 109, in worker\n",
+            "    initializer(*initargs)\n",
+            "  File \"/usr/local/lib/python3.10/dist-packages/gensim/models/ldamulticore.py\", line 346, in worker_e_step\n",
+            "    worker_lda.do_estep(chunk)  # TODO: auto-tune alpha?\n",
+            "  File \"/usr/local/lib/python3.10/dist-packages/gensim/models/ldamodel.py\", line 768, in do_estep\n",
+            "    gamma, sstats = self.inference(chunk, collect_sstats=True)\n",
+            "  File \"/usr/local/lib/python3.10/dist-packages/gensim/models/ldamodel.py\", line 706, in inference\n",
+            "    expElogbetad = self.expElogbeta[:, ids]\n",
+            "IndexError: index 678 is out of bounds for axis 1 with size 678\n"
+          ]
+        }
+      ],
+      "source": [
+        "from pprint import pprint\n",
+        "# number of topics\n",
+        "num_topics = 10\n",
+        "# Build LDA model\n",
+        "lda_model = gensim.models.LdaMulticore(corpus=corpus_suggestions,\n",
+        "                                       id2word=id2word,\n",
+        "                                       num_topics=num_topics)\n",
+        "# Print the Keyword in the 10 topics\n",
+        "pprint(lda_model.print_topics())\n",
+        "suggestions_lda = lda_model[corpus_suggestions]"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "BY19XdmqeTGQ"
+      },
+      "outputs": [],
+      "source": [
+        "from pprint import pprint\n",
+        "# number of topics\n",
+        "num_topics = 10\n",
+        "# Build LDA model\n",
+        "lda_model = gensim.models.LdaMulticore(corpus=corpus_values,\n",
+        "                                       id2word=id2word,\n",
+        "                                       num_topics=num_topics)\n",
+        "# Print the Keyword in the 10 topics\n",
+        "pprint(lda_model.print_topics())\n",
+        "values_lda = lda_model[corpus_values]"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "jwAd_9pNVOlT"
+      },
+      "outputs": [],
+      "source": [
+        "!pip install pyLDAvis"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "nNML2JMTUid7"
+      },
+      "outputs": [],
+      "source": [
+        "import pyLDAvis.gensim\n",
+        "\n",
+        "pyLDAvis.enable_notebook()\n",
+        "plot = pyLDAvis.gensim.prepare(lda_model, corpus_suggestions, id2word)"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "eLysoVQvYDWk"
+      },
+      "outputs": [],
+      "source": [
+        "#create a method that assigns LDA TOPICS TO A dataframe"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "zyeVGk_hWXKV"
+      },
+      "outputs": [],
+      "source": [
+        "plot"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "__E8Y8AnerC4"
+      },
+      "outputs": [],
+      "source": [
+        "pyLDAvis.enable_notebook()\n",
+        "plot = pyLDAvis.gensim.prepare(lda_model, corpus_values, id2word)"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "6xbjwDNbfFTo"
+      },
+      "outputs": [],
+      "source": [
+        "plot"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "NHYqlVhnfF-Z"
+      },
+      "outputs": [],
+      "source": []
+    }
+  ],
+  "metadata": {
+    "colab": {
+      "provenance": []
+    },
+    "kernelspec": {
+      "display_name": "Python 3",
+      "name": "python3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "nbformat": 4,
+  "nbformat_minor": 0
+}
